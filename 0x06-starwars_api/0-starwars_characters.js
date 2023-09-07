@@ -1,12 +1,8 @@
 #!/usr/bin/node
 import request from 'request';
-import process from 'process';
 
 const movieId = process.argv[2];
-if (!movieId) {
-  console.error('Please provide a movie ID');
-  process.exit(1);
-}
+
 const apiUrl = `https://swapi-api.alx-tools.com/api/films/${movieId}/`;
 
 request(apiUrl, (error, response, body) => {
@@ -19,7 +15,12 @@ request(apiUrl, (error, response, body) => {
       const movie = JSON.parse(body);
       const characterUrls = movie.characters;
 
-      characterUrls.forEach((characterUrl) => {
+      const fetchCharacterNames = (urls) => {
+        if (urls.length === 0) {
+          process.exit(0);
+        }
+
+        const characterUrl = urls.shift();
         request(characterUrl, (charError, charResponse, charBody) => {
           if (charError) {
             console.error('Error fetching character:', charError);
@@ -28,9 +29,13 @@ request(apiUrl, (error, response, body) => {
           } else {
             const character = JSON.parse(charBody);
             console.log(character.name);
+
+            fetchCharacterNames(urls);
           }
         });
-      });
+      };
+
+      fetchCharacterNames([...characterUrls]);
     } catch (parseError) {
       console.error('Error parsing JSON response:', parseError);
     }
