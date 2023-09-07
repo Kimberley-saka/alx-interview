@@ -1,3 +1,4 @@
+#!/usr/bin/node
 import request from 'request';
 import process from 'process';
 
