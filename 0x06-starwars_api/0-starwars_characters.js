@@ -1,4 +1,5 @@
 #!/usr/bin/node
+/*get movie characters*/
 import request from 'request';
 
 const movieId = process.argv[2];
