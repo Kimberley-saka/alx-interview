@@ -5,34 +5,34 @@ Log parsing
 import sys
 
 
+status_codes = {'200': 0, '301': 0, '400': 0, '401': 0,
+                '403': 0, '404': 0, '405': 0, '500': 0}
 total_size = 0
-status_codes = {}
+counter = 0
 
 try:
-    for i, line in enumerate(sys.stdin, start=1):
-        parts = line.split()
-        if len(parts) >= 8:
-            ip_address, _, _, date, _, _, status_code_str, file_size_str = parts[:8]
+    for line in sys.stdin:
+        line_list = line.split(" ")
+        if len(line_list) > 4:
+            code = line_list[-2]
+            size = int(line_list[-1])
+            if code in status_codes.keys():
+                status_codes[code] += 1
+            total_size += size
+            counter += 1
 
-            try:
-                status_code = int(status_code_str)
-                file_size = int(file_size_str)
-                total_size += file_size
+        if counter == 10:
+            counter = 0
+            print('File size: {}'.format(total_size))
+            for key, value in sorted(status_codes.items()):
+                if value != 0:
+                    print('{}: {}'.format(key, value))
 
-                if 200 <= status_code <= 500:
-                    status_codes[status_code] = status_codes.get(status_code, 0) + 1
-
-                if i % 10 == 0:
-                    print(f"File size: {total_size}")
-                    for code in sorted(status_codes):
-                        print(f"{code}: {status_codes[code]}")
-
-            except ValueError:
-                pass
-
-except KeyboardInterrupt:
+except Exception as err:
     pass
 
-print(f"File size: {total_size}")
-for code in sorted(status_codes):
-    print(f"{code}: {status_codes[code]}")
+finally:
+    print('File size: {}'.format(total_size))
+    for key, value in sorted(status_codes.items()):
+        if value != 0:
+            print('{}: {}'.format(key, value))
